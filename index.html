@@ -205,5 +205,26 @@ function escapar(texto) {
 
 agregarPregunta();
 </script>
+  
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+  import { getDatabase } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBYJf5QtU05y0463ONUKypc0SNBzvhsxX4",
+    authDomain: "amongus-class-m2010.firebaseapp.com",
+    databaseURL: "https://amongus-class-m2010-default-rtdb.firebaseio.com",
+    projectId: "amongus-class-m2010",
+    storageBucket: "amongus-class-m2010.firebasestorage.app",
+    messagingSenderId: "259725936012",
+    appId: "1:259725936012:web:786527b20688c9645e02a9"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const database = getDatabase(app);
+
+  console.log("Firebase conectado correctamente");
+</script>
+
 </body>
 </html>
