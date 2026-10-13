@@ -2,51 +2,208 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Among Us Educativo</title>
-  <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: #101827;
-      color: white;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-    }
-    main { padding: 24px; }
-    h1 { color: #58d8ff; }
-    button {
-      display: block;
-      width: 100%;
-      margin: 14px 0;
-      padding: 16px;
-      border: 0;
-      border-radius: 12px;
-      font-size: 17px;
-      font-weight: bold;
-      background: #2979ff;
-      color: white;
-    }
-    #estudiantes { background: #16a36a; }
-    p { color: #cbd5e1; }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Among Us Educativo</title>
+<style>
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: #101827;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+header {
+  text-align: center;
+  padding: 25px 12px;
+  background: #17243a;
+  border-bottom: 3px solid #38bdf8;
+}
+h1 { color: #38bdf8; }
+main { max-width: 850px; margin: auto; padding: 20px; }
+.panel {
+  background: #1e293b;
+  border-radius: 15px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+button, input, select {
+  width: 100%;
+  padding: 12px;
+  margin: 7px 0;
+  border-radius: 8px;
+  font-size: 16px;
+}
+button {
+  background: #2563eb;
+  color: white;
+  border: 0;
+  cursor: pointer;
+  font-weight: bold;
+}
+button:hover { background: #1d4ed8; }
+.secondary { background: #15803d; }
+.back { background: #475569; }
+input, select { border: 1px solid #64748b; }
+label { display: block; margin-top: 12px; }
+.hidden { display: none; }
+.question {
+  border: 1px solid #475569;
+  padding: 12px;
+  border-radius: 10px;
+  margin: 12px 0;
+}
+small { color: #cbd5e1; }
+</style>
 </head>
 <body>
-  <main>
-    <h1>🚀 AMONG US EDUCATIVO</h1>
-    <p>¡Aprende, responde y descubre al impostor!</p>
-    <button onclick="alert('Pronto construiremos la sala del profesor.')">
-      👩‍🏫 SALA DEL PROFESOR
-    </button>
-    <button id="estudiantes" onclick="alert('Pronto construiremos la sala de estudiantes.')">
-      👨‍🚀 SALA DE ESTUDIANTES
-    </button>
-    <p>Una aventura espacial para aprender jugando.</p>
-  </main>
+<header>
+  <h1>🚀 AMONG US EDUCATIVO</h1>
+  <p>¡Aprende, responde y descubre al impostor!</p>
+</header>
+
+<main>
+<section id="inicio" class="panel">
+  <h2>Bienvenido a la nave</h2>
+  <p>Selecciona tu sala para comenzar.</p>
+  <button onclick="mostrar('profesor')">👩‍🏫 Sala del profesor</button>
+  <button class="secondary" onclick="mostrar('estudiante')">👨‍🚀 Sala de estudiantes</button>
+</section>
+
+<section id="profesor" class="panel hidden">
+  <h2>👩‍🏫 Sala del profesor</h2>
+  <label>Nombre del profesor</label>
+  <input id="nombreProfesor" placeholder="Escribe tu nombre">
+  <label>Mapa de la partida</label>
+  <select id="mapa">
+    <option value="Nave espacial">Nave espacial</option>
+    <option value="Estación">Estación espacial</option>
+    <option value="Base lunar">Base lunar</option>
+  </select>
+  <label>Cantidad de impostores</label>
+  <select id="impostores">
+    <option>1</option><option>2</option><option>3</option>
+    <option>4</option><option>5</option><option>6</option>
+  </select>
+  <h3>Preguntas de la partida</h3>
+  <div id="preguntas"></div>
+  <button onclick="agregarPregunta()">➕ Agregar pregunta</button>
+  <button class="secondary" onclick="crearPartida()">Crear partida</button>
+  <div id="resultadoProfesor"></div>
+  <button class="back" onclick="mostrar('inicio')">Volver al inicio</button>
+</section>
+
+<section id="estudiante" class="panel hidden">
+  <h2>👨‍🚀 Sala de estudiantes</h2>
+  <label>Tu nombre</label>
+  <input id="nombreEstudiante" placeholder="Escribe tu nombre">
+  <label>Código de la partida</label>
+  <input id="codigoEntrada" placeholder="Ejemplo: A7K9P2">
+  <button class="secondary" onclick="entrarPartida()">Entrar a la nave</button>
+  <div id="resultadoEstudiante"></div>
+  <button class="back" onclick="mostrar('inicio')">Volver al inicio</button>
+</section>
+</main>
+
+<script>
+let numeroPreguntas = 0;
+
+function mostrar(id) {
+  document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+  document.getElementById(id).classList.remove('hidden');
+}
+
+function agregarPregunta() {
+  numeroPreguntas++;
+  const div = document.createElement('div');
+  div.className = 'question';
+  div.innerHTML = `
+    <h4>Pregunta ${numeroPreguntas}</h4>
+    <input class="enunciado" placeholder="Escribe la pregunta">
+    <input class="opcionA" placeholder="Opción A">
+    <input class="opcionB" placeholder="Opción B">
+    <input class="opcionC" placeholder="Opción C">
+    <input class="correcta" placeholder="Respuesta correcta (A, B o C)">
+    <button type="button" onclick="this.parentElement.remove()">Eliminar pregunta</button>`;
+  document.getElementById('preguntas').appendChild(div);
+}
+
+function crearPartida() {
+  const nombre = document.getElementById('nombreProfesor').value.trim();
+  const bloques = [...document.querySelectorAll('#preguntas .question')];
+  const preguntas = bloques.map(b => ({
+    texto: b.querySelector('.enunciado').value.trim(),
+    A: b.querySelector('.opcionA').value.trim(),
+    B: b.querySelector('.opcionB').value.trim(),
+    C: b.querySelector('.opcionC').value.trim(),
+    correcta: b.querySelector('.correcta').value.trim().toUpperCase()
+  }));
+
+  if (!nombre) {
+    alert('Escribe el nombre del profesor.');
+    return;
+  }
+  if (!preguntas.length || preguntas.some(p =>
+      !p.texto || !p.A || !p.B || !p.C ||
+      !['A','B','C'].includes(p.correcta))) {
+    alert('Completa al menos una pregunta y su respuesta correcta (A, B o C).');
+    return;
+  }
+
+  const codigo = Math.random().toString(36).substring(2,8).toUpperCase();
+  const partida = {
+    nombre,
+    mapa: document.getElementById('mapa').value,
+    impostores: Number(document.getElementById('impostores').value),
+    preguntas,
+    jugadores: [],
+    iniciada: false
+  };
+
+  try {
+    localStorage.setItem('partida_' + codigo, JSON.stringify(partida));
+    localStorage.setItem('ultimaPartidaProfesor', codigo);
+    document.getElementById('resultadoProfesor').innerHTML =
+      `<h3>Partida creada</h3><p>Tu código es:</p>
+       <h2>${codigo}</h2>
+       <p>Mapa: ${partida.mapa}</p>
+       <p>Preguntas: ${preguntas.length}</p>
+       <small>Comparte el código con tus estudiantes.</small>`;
+  } catch (e) {
+    alert('No se pudo guardar la partida en este navegador.');
+  }
+}
+
+function entrarPartida() {
+  const nombre = document.getElementById('nombreEstudiante').value.trim();
+  const codigo = document.getElementById('codigoEntrada').value.trim().toUpperCase();
+  if (!nombre || !codigo) {
+    alert('Escribe tu nombre y el código de la partida.');
+    return;
+  }
+  const datos = localStorage.getItem('partida_' + codigo);
+  if (!datos) {
+    document.getElementById('resultadoEstudiante').innerHTML =
+      '<p>No se encontró la partida en este navegador. La conexión entre dispositivos se añadirá en la siguiente fase.</p>';
+    return;
+  }
+  const partida = JSON.parse(datos);
+  document.getElementById('resultadoEstudiante').innerHTML =
+    `<h3>¡Bienvenido a la nave, ${escapar(nombre)}!</h3>
+     <p>Profesor: ${escapar(partida.nombre)}</p>
+     <p>Mapa: ${escapar(partida.mapa)}</p>
+     <p>La partida aún no ha comenzado.</p>`;
+}
+
+function escapar(texto) {
+  return texto.replace(/[&<>"']/g, c => ({
+    '&':'&amp;', '<':'&lt;', '>':'&gt;',
+    '"':'&quot;', "'":'&#39;'
+  })[c]);
+}
+
+agregarPregunta();
+</script>
 </body>
 </html>
-
