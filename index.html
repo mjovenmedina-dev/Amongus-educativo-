@@ -91,7 +91,14 @@ small { color: #cbd5e1; }
   <button onclick="agregarPregunta()">➕ Agregar pregunta</button>
   <button class="secondary" onclick="crearPartida()">Crear partida</button>
   <div id="resultadoProfesor"></div>
-  <button class="back" onclick="mostrar('inicio')">Volver al inicio</button>
+  <div id="listajugadores">
+  <h3>jugadoresconectados</h3>
+    <p id="contador jugadores">jugadores:0</p>
+    <ul id="jugadoresconectados">
+      <li>Esperando jugadores...</li>
+    </ul>
+  </div>
+      <button class="back" onclick="mostrar('inicio')">Volver al inicio</button>
 </section>
 
 <section id="estudiante" class="panel hidden">
