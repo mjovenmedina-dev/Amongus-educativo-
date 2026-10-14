@@ -211,26 +211,56 @@ async function crearPartida() {
   }
       }
 
-function entrarPartida() {
+
+async function entrarPartida() {
   const nombre = document.getElementById('nombreEstudiante').value.trim();
   const codigo = document.getElementById('codigoEntrada').value.trim().toUpperCase();
+  const resultado = document.getElementById('resultadoEstudiante');
+
   if (!nombre || !codigo) {
     alert('Escribe tu nombre y el código de la partida.');
     return;
   }
-  const datos = localStorage.getItem('partida_' + codigo);
-  if (!datos) {
-    document.getElementById('resultadoEstudiante').innerHTML =
-      '<p>No se encontró la partida en este navegador. La conexión entre dispositivos se añadirá en la siguiente fase.</p>';
+
+  if (!window.firebaseReady || !window.db || !window.userId) {
+    alert('Firebase todavía no está listo. Espera unos segundos e inténtalo de nuevo.');
     return;
   }
-  const partida = JSON.parse(datos);
-  document.getElementById('resultadoEstudiante').innerHTML =
-    `<h3>¡Bienvenido a la nave, ${escapar(nombre)}!</h3>
-     <p>Profesor: ${escapar(partida.nombre)}</p>
-     <p>Mapa: ${escapar(partida.mapa)}</p>
-     <p>La partida aún no ha comenzado.</p>`;
-}
+
+  resultado.textContent = 'Buscando la partida...';
+
+  try {
+    const referencia = window.db.ref('partidas/' + codigo + '/info');
+    const consulta = await referencia.once('value');
+
+    if (!consulta.exists()) {
+      resultado.innerHTML = '<p>No se encontró la partida. Revisa el código e inténtalo de nuevo.</p>';
+      return;
+    }
+
+    const partida = consulta.val();
+
+    await window.db.ref(
+      'partidas/' + codigo + '/jugadores/' + window.userId
+    ).set({
+      nombre: nombre,
+      unido: true
+    });
+
+    resultado.innerHTML = `
+      <h3>¡Bienvenido a la nave, ${escapar(nombre)}!</h3>
+      <p>Profesor: ${escapar(partida.nombre || '')}</p>
+      <p>Mapa: ${escapar(partida.mapa || '')}</p>
+      <p>Preguntas: ${Object.keys(partida.preguntas || {}).length}</p>
+      <p>¡Te has unido a la partida!</p>
+      <p>La partida aún no ha comenzado.</p>
+    `;
+  } catch (error) {
+    console.error('Error al entrar a la partida:', error);
+    resultado.innerHTML =
+      '<p>No se pudo entrar a la partida. Comprueba la conexión y las reglas de Firebase.</p>';
+  }
+  }
 
 function escapar(texto) {
   return texto.replace(/[&<>"']/g, c => ({
