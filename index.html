@@ -129,9 +129,11 @@ function agregarPregunta() {
   document.getElementById('preguntas').appendChild(div);
 }
 
-function crearPartida() {
+
+async function crearPartida() {
   const nombre = document.getElementById('nombreProfesor').value.trim();
   const bloques = [...document.querySelectorAll('#preguntas .question')];
+
   const preguntas = bloques.map(b => ({
     texto: b.querySelector('.enunciado').value.trim(),
     A: b.querySelector('.opcionA').value.trim(),
@@ -144,36 +146,70 @@ function crearPartida() {
     alert('Escribe el nombre del profesor.');
     return;
   }
+
   if (!preguntas.length || preguntas.some(p =>
-      !p.texto || !p.A || !p.B || !p.C ||
-      !['A','B','C'].includes(p.correcta))) {
-    alert('Completa al menos una pregunta y su respuesta correcta (A, B o C).');
+    !p.texto || !p.A || !p.B || !p.C ||
+    !['A', 'B', 'C'].includes(p.correcta)
+  )) {
+    alert('Completa las preguntas y sus respuestas correctas (A, B o C).');
     return;
   }
 
-  const codigo = Math.random().toString(36).substring(2,8).toUpperCase();
+  if (!window.firebaseReady || !window.db || !window.userId) {
+    alert('Firebase todavía no está listo. Espera unos segundos y vuelve a intentarlo.');
+    return;
+  }
+
+  const codigo = Math.random().toString(36).substring(2, 8).toUpperCase();
+
+  const preguntasPublicas = {};
+  const respuestasCorrectas = {};
+
+  preguntas.forEach((p, i) => {
+    preguntasPublicas[i] = {
+      texto: p.texto,
+      A: p.A,
+      B: p.B,
+      C: p.C
+    };
+    respuestasCorrectas[i] = p.correcta;
+  });
+
   const partida = {
-    nombre,
+    ownerUid: window.userId,
+    nombre: nombre,
     mapa: document.getElementById('mapa').value,
     impostores: Number(document.getElementById('impostores').value),
-    preguntas,
-    jugadores: [],
+    preguntas: preguntasPublicas,
     iniciada: false
   };
 
   try {
-    localStorage.setItem('partida_' + codigo, JSON.stringify(partida));
-    localStorage.setItem('ultimaPartidaProfesor', codigo);
-    document.getElementById('resultadoProfesor').innerHTML =
-      `<h3>Partida creada</h3><p>Tu código es:</p>
-       <h2>${codigo}</h2>
-       <p>Mapa: ${partida.mapa}</p>
-       <p>Preguntas: ${preguntas.length}</p>
-       <small>Comparte el código con tus estudiantes.</small>`;
-  } catch (e) {
-    alert('No se pudo guardar la partida en este navegador.');
+    const referencia = window.db.ref('partidas/' + codigo);
+
+    const existe = await referencia.child('info').once('value');
+
+    if (existe.exists()) {
+      alert('El código coincidió con otra partida. Intenta crearla otra vez.');
+      return;
+    }
+
+    await referencia.child('info').set(partida);
+    await referencia.child('respuestas').set(respuestasCorrectas);
+
+    document.getElementById('resultadoProfesor').innerHTML = `
+      <h3>¡Partida creada!</h3>
+      <p>Tu código es:</p>
+      <h2>${codigo}</h2>
+      <p>Mapa: ${escapar(partida.mapa)}</p>
+      <p>Preguntas: ${preguntas.length}</p>
+      <small>Comparte el código con tus estudiantes.</small>
+    `;
+  } catch (error) {
+    console.error('Error al crear la partida:', error);
+    alert('No se pudo crear la partida en Firebase. Revisa las reglas de la base de datos.');
   }
-}
+      }
 
 function entrarPartida() {
   const nombre = document.getElementById('nombreEstudiante').value.trim();
