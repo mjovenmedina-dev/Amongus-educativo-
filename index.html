@@ -206,10 +206,12 @@ function escapar(texto) {
 agregarPregunta();
 </script>
   
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
-  import { getDatabase } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-database.js";
 
+<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/11.10.0/firebase-database-compat.js"></script>
+
+<script>
   const firebaseConfig = {
     apiKey: "AIzaSyBYJf5QtU05y0463ONUKypc0SNBzvhsxX4",
     authDomain: "amongus-class-m2010.firebaseapp.com",
@@ -220,10 +222,23 @@ agregarPregunta();
     appId: "1:259725936012:web:786527b20688c9645e02a9"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const database = getDatabase(app);
+  firebase.initializeApp(firebaseConfig);
 
-  console.log("Firebase conectado correctamente");
+  window.firebaseReady = false;
+  window.db = null;
+  window.userId = null;
+
+  firebase.auth().signInAnonymously()
+    .then((credential) => {
+      window.userId = credential.user.uid;
+      window.db = firebase.database();
+      window.firebaseReady = true;
+      console.log("Firebase listo para el juego");
+    })
+    .catch((error) => {
+      console.error("Error de Firebase:", error);
+      alert("No se pudo conectar con Firebase. Revisa la configuración.");
+    });
 </script>
 
 </body>
