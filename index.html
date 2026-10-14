@@ -269,6 +269,49 @@ async function entrarPartida() {
   }
   }
 
+let dejarDeEscucharJugadores = null;
+
+function escucharJugadores(codigo) {
+  if (!window.firebaseReady || !window.db) {
+    return;
+  }
+
+  if (dejarDeEscucharJugadores) {
+    dejarDeEscucharJugadores();
+  }
+
+  const referencia = window.db.ref(
+    'partidas/' + codigo + '/jugadores'
+  );
+
+  const actualizarLista = (snapshot) => {
+    const lista = document.getElementById('jugadoresConectados');
+    const contador = document.getElementById('contadorJugadores');
+
+    const jugadores = snapshot.val() || {};
+    const participantes = Object.values(jugadores);
+
+    contador.textContent = 'Jugadores: ' + participantes.length;
+    lista.innerHTML = '';
+
+    if (participantes.length === 0) {
+      lista.innerHTML = '<li>Esperando jugadores...</li>';
+      return;
+    }
+
+    participantes.forEach((jugador) => {
+      const elemento = document.createElement('li');
+      elemento.textContent = jugador.nombre || 'Jugador';
+      lista.appendChild(elemento);
+    });
+  };
+
+  referencia.on('value', actualizarLista);
+
+  dejarDeEscucharJugadores = () => {
+    referencia.off('value', actualizarLista);
+  };
+  }
 function escapar(texto) {
   return texto.replace(/[&<>"']/g, c => ({
     '&':'&amp;', '<':'&lt;', '>':'&gt;',
