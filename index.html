@@ -203,7 +203,7 @@ async function crearPartida() {
 
     await referencia.child('info').set(partida);
     await referencia.child('respuestas').set(respuestasCorrectas);
-    escucharjugadores(codigo);
+    escucharJugadores(codigo);
 
     document.getElementById('resultadoProfesor').innerHTML = `
       <h3>¡Partida creada!</h3>
