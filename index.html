@@ -272,6 +272,7 @@ async function entrarPartida() {
 
 let dejarDeEscucharJugadores = null;
 
+
 function escucharJugadores(codigo) {
   if (!window.firebaseReady || !window.db) {
     return;
@@ -289,31 +290,42 @@ function escucharJugadores(codigo) {
     const lista = document.getElementById('jugadoresConectados');
     const contador = document.getElementById('contadorJugadores');
 
-    const jugadores = snapshot.val() || {};
-    const participantes = Object.values(jugadores);
-
-    contador.textContent = 'Jugadores: ' + participantes.length;
-    lista.innerHTML = '';
-
-    if (participantes.length === 0) {
-      lista.innerHTML = '<li>Esperando jugadores...</li>';
+    if (!lista || !contador) {
+      console.error('No se encontró la lista o el contador.');
       return;
     }
 
-    participantes.forEach((jugador) => {
+    const jugadores = snapshot.val() || {};
+    const ids = Object.keys(jugadores);
+
+    lista.innerHTML = '';
+
+    ids.forEach((id) => {
+      const jugador = jugadores[id];
       const elemento = document.createElement('li');
       elemento.textContent = jugador.nombre || 'Jugador';
       lista.appendChild(elemento);
     });
+
+    contador.textContent = 'Jugadores: ' + ids.length;
+
+    if (ids.length === 0) {
+      lista.innerHTML = '<li>Esperando jugadores...</li>';
+    }
+
+    console.log('Jugadores recibidos de Firebase:', ids.length);
   };
 
-  referencia.on('value', actualizarLista);
+  referencia.on('value', actualizarLista, (error) => {
+    console.error('Error al escuchar jugadores:', error);
+  });
 
   dejarDeEscucharJugadores = () => {
     referencia.off('value', actualizarLista);
   };
-  }
-function escapar(texto) {
+}
+
+  function escapar(texto) {
   return texto.replace(/[&<>"']/g, c => ({
     '&':'&amp;', '<':'&lt;', '>':'&gt;',
     '"':'&quot;', "'":'&#39;'
